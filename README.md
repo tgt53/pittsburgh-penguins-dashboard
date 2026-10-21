@@ -15,6 +15,8 @@ The original MoneyPuck CSV is saved at `data/moneypuck_pit_2025_26_skaters_raw.c
 
 For a deeper comparison of on-ice expected goals, see [`notebooks/moneypuck_penguins_xgoal_compound.ipynb`](notebooks/moneypuck_penguins_xgoal_compound.ipynb). It shows expected goals for, against, the difference, rates per 60 minutes, and an equally weighted combined score. The table and chart are saved as [`data/penguins_xgoal_compound_2025_26.csv`](data/penguins_xgoal_compound_2025_26.csv) and [`data/penguins_xgoal_compound_2025_26.png`](data/penguins_xgoal_compound_2025_26.png).
 
+For on-ice versus off-ice expected goals, see [`notebooks/moneypuck_penguins_on_off_xgoals.ipynb`](notebooks/moneypuck_penguins_on_off_xgoals.ipynb). It compares each qualifying player's xGF and xGA rates per 60 using MoneyPuck's recorded on-ice and bench time. The table and chart are saved as [`data/penguins_on_off_xgoals_2025_26.csv`](data/penguins_on_off_xgoals_2025_26.csv) and [`data/penguins_on_off_xgoals_2025_26.png`](data/penguins_on_off_xgoals_2025_26.png).
+
 MoneyPuck's [download page](https://www.moneypuck.com/data.htm) says its listed data is free for non-commercial use and asks for clear credit whenever its data is shown. Keep the attribution in the notebook when sharing its outputs.
 
 ## Load the MoneyPuck tables into TiDB
