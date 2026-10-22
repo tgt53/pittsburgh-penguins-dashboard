@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Pittsburgh Penguins</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Pittsburgh Penguins</h1>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Player ID</th>
+                <th scope="col">Player</th>
+                <th scope="col">Position</th>
+                <th scope="col">Games</th>
+                <th scope="col">Ice time (minutes)</th>
+                <th scope="col">On-ice xG share (%)</th>
+                <th scope="col">On-ice shot attempt share (%)</th>
+                <th scope="col">Individual expected goals</th>
+                <th scope="col">Individual actual goals</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in players %}
+            <tr>
+                <td>{{ player.player_id }}</td>
+                <td>{{ player.player_name }}</td>
+                <td>{{ player.position }}</td>
+                <td>{{ player.games_played }}</td>
+                <td>{{ player.ice_time_minutes }}</td>
+                <td>{{ player.on_ice_xg_share_pct }}</td>
+                <td>{{ player.on_ice_shot_attempt_share_pct }}</td>
+                <td>{{ player.individual_expected_goals }}</td>
+                <td>{{ player.individual_actual_goals }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9">No players found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
