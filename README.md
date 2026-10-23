@@ -21,6 +21,6 @@ MoneyPuck's [download page](https://www.moneypuck.com/data.htm) says its listed 
 
 ## Load the MoneyPuck tables into TiDB
 
-The database loader writes to the non-system `test` schema. It creates three tables: `moneypuck_pit_skaters_raw_2025_26` (all raw rows preserved as JSON), `penguins_player_impact_2025_26` (the 29-row cleaned player table), and `penguins_xgoal_compound_2025_26` (the 24 players meeting the comparison cutoffs). The loader checks the source files and uses upserts, so rerunning it updates matching rows instead of duplicating them.
+The database loader writes to the non-system `test` schema. It creates four tables: `moneypuck_pit_skaters_raw_2025_26` (all raw rows preserved as JSON), `penguins_player_impact_2025_26` (the cleaned player table), `penguins_xgoal_compound_2025_26` (players meeting the comparison cutoffs), and `penguins_on_off_xgoals_2025_26` (the on-ice versus off-ice xGoals rates). The loader checks the source files and uses upserts, so rerunning it updates matching rows instead of duplicating them.
 
 Keep the connection URL in the ignored `.env` file as `TIDB_URL=mysql://USER:PASSWORD@HOST:4000/test`. Use the `test` database path; the loader refuses to write into TiDB's built-in `sys` schema. Install project dependencies with `python -m pip install -r requirements.txt`, then run `python scripts/load_moneypuck_to_tidb.py` from the project folder. Never commit `.env`.

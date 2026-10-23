@@ -24,6 +24,7 @@ LATEST_RAW_CSV = PROJECT_DIR / "data" / "moneypuck_pit_2025_26_skaters_latest.cs
 RAW_CSV = LATEST_RAW_CSV if LATEST_RAW_CSV.exists() else PROJECT_DIR / "data" / "moneypuck_pit_2025_26_skaters_raw.csv"
 CLEAN_CSV = PROJECT_DIR / "data" / "penguins_player_impact_2025_26.csv"
 COMPOUND_CSV = PROJECT_DIR / "data" / "penguins_xgoal_compound_2025_26.csv"
+ON_OFF_CSV = PROJECT_DIR / "data" / "penguins_on_off_xgoals_2025_26.csv"
 EXPECTED_DATABASE = "test"
 
 
@@ -71,6 +72,7 @@ def main() -> None:
     raw_rows = read_csv(RAW_CSV)
     clean_rows = read_csv(CLEAN_CSV)
     compound_rows = read_csv(COMPOUND_CSV) if COMPOUND_CSV.exists() else []
+    on_off_rows = read_csv(ON_OFF_CSV) if ON_OFF_CSV.exists() else []
     if not raw_rows or not clean_rows:
         raise SystemExit("One of the MoneyPuck CSV files is empty.")
 
@@ -110,6 +112,15 @@ def main() -> None:
             raise SystemExit("Compound CSV includes a player below its sample-size cutoff.")
         if abs(float(row["xG difference"]) - (float(row["xGF"]) - float(row["xGA"]))) > 0.02:
             raise SystemExit("Compound CSV contains an inconsistent xGoals difference.")
+
+    on_off_names = [row["Player"].strip() for row in on_off_rows]
+    if len(on_off_names) != len(set(on_off_names)):
+        raise SystemExit("On/off CSV contains duplicate player names.")
+    for row in on_off_rows:
+        if row["Player"].strip() not in all_situation_ids:
+            raise SystemExit("An on/off player could not be matched to the raw data.")
+        if to_int(row["Games"]) < 10:
+            raise SystemExit("On/off CSV includes a player below the 10-game minimum.")
 
     tls_context = ssl.create_default_context(cafile=certifi.where())
     connection = pymysql.connect(
@@ -171,6 +182,28 @@ def main() -> None:
                         xg_against_per_60 DECIMAL(10, 2) NOT NULL,
                         xg_difference_per_60 DECIMAL(10, 2) NOT NULL,
                         combined_impact_score DECIMAL(10, 2) NOT NULL
+                    )"""
+                )
+            if on_off_rows:
+                cursor.execute(
+                    """CREATE TABLE IF NOT EXISTS penguins_on_off_xgoals_2025_26 (
+                        player_id BIGINT NOT NULL PRIMARY KEY,
+                        rank_by_relative_xgf_per_60 SMALLINT NOT NULL,
+                        player_name VARCHAR(120) NOT NULL,
+                        position VARCHAR(12),
+                        games_played SMALLINT NOT NULL,
+                        on_ice_minutes DECIMAL(10, 2) NOT NULL,
+                        off_ice_minutes DECIMAL(10, 2) NOT NULL,
+                        xgf_on_total DECIMAL(10, 2) NOT NULL,
+                        xgf_off_total DECIMAL(10, 2) NOT NULL,
+                        xgf_on_per_60 DECIMAL(10, 2) NOT NULL,
+                        xgf_off_per_60 DECIMAL(10, 2) NOT NULL,
+                        relative_xgf_per_60 DECIMAL(10, 2) NOT NULL,
+                        xga_on_total DECIMAL(10, 2) NOT NULL,
+                        xga_off_total DECIMAL(10, 2) NOT NULL,
+                        xga_on_per_60 DECIMAL(10, 2) NOT NULL,
+                        xga_off_per_60 DECIMAL(10, 2) NOT NULL,
+                        relative_xga_per_60 DECIMAL(10, 2) NOT NULL
                     )"""
                 )
 
@@ -239,6 +272,49 @@ def main() -> None:
                     ],
                 )
 
+            if on_off_rows:
+                on_off_sql = """INSERT INTO penguins_on_off_xgoals_2025_26
+                    (player_id, rank_by_relative_xgf_per_60, player_name, position,
+                     games_played, on_ice_minutes, off_ice_minutes, xgf_on_total,
+                     xgf_off_total, xgf_on_per_60, xgf_off_per_60,
+                     relative_xgf_per_60, xga_on_total, xga_off_total,
+                     xga_on_per_60, xga_off_per_60, relative_xga_per_60)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE rank_by_relative_xgf_per_60=VALUES(rank_by_relative_xgf_per_60),
+                        player_name=VALUES(player_name), position=VALUES(position),
+                        games_played=VALUES(games_played), on_ice_minutes=VALUES(on_ice_minutes),
+                        off_ice_minutes=VALUES(off_ice_minutes), xgf_on_total=VALUES(xgf_on_total),
+                        xgf_off_total=VALUES(xgf_off_total), xgf_on_per_60=VALUES(xgf_on_per_60),
+                        xgf_off_per_60=VALUES(xgf_off_per_60), relative_xgf_per_60=VALUES(relative_xgf_per_60),
+                        xga_on_total=VALUES(xga_on_total), xga_off_total=VALUES(xga_off_total),
+                        xga_on_per_60=VALUES(xga_on_per_60), xga_off_per_60=VALUES(xga_off_per_60),
+                        relative_xga_per_60=VALUES(relative_xga_per_60)"""
+                cursor.executemany(
+                    on_off_sql,
+                    [
+                        (
+                            all_situation_ids[row["Player"].strip()],
+                            to_int(row["Rank by relative xGF/60"]),
+                            row["Player"].strip(),
+                            row["Position"] or None,
+                            to_int(row["Games"]),
+                            float(row["On-ice minutes"]),
+                            float(row["Off-ice minutes"]),
+                            float(row["xGF on total"]),
+                            float(row["xGF off total"]),
+                            float(row["xGF on per 60"]),
+                            float(row["xGF off per 60"]),
+                            float(row["Relative xGF per 60"]),
+                            float(row["xGA on total"]),
+                            float(row["xGA off total"]),
+                            float(row["xGA on per 60"]),
+                            float(row["xGA off per 60"]),
+                            float(row["Relative xGA per 60"]),
+                        )
+                        for row in on_off_rows
+                    ],
+                )
+
             clean_sql = """INSERT INTO penguins_player_impact_2025_26
                 (player_id, player_name, position, games_played, ice_time_minutes,
                  on_ice_xg_share_pct, on_ice_shot_attempt_share_pct,
@@ -280,7 +356,10 @@ def main() -> None:
             if compound_rows:
                 cursor.execute("SELECT COUNT(*) FROM penguins_xgoal_compound_2025_26")
                 print(f"penguins_xgoal_compound_2025_26: {cursor.fetchone()[0]} rows")
-        print(f"Loaded {len(raw_rows)} raw situation rows, {len(clean_rows)} cleaned player rows, and {len(compound_rows)} compound impact rows into `{database}`.")
+            if on_off_rows:
+                cursor.execute("SELECT COUNT(*) FROM penguins_on_off_xgoals_2025_26")
+                print(f"penguins_on_off_xgoals_2025_26: {cursor.fetchone()[0]} rows")
+        print(f"Loaded {len(raw_rows)} raw situation rows, {len(clean_rows)} cleaned player rows, {len(compound_rows)} compound impact rows, and {len(on_off_rows)} on/off xGoals rows into `{database}`.")
     except Exception:
         connection.rollback()
         raise
