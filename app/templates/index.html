@@ -3,7 +3,14 @@
 {% block title %}Penguins Player Dashboard{% endblock %}
 
 {% block content %}
-    <h2>Player Impact</h2>
+    <div class="page-heading">
+        <img
+            class="team-logo"
+            src="{{ url_for('static', filename='images/penguins_logo.png') }}"
+            alt="Pittsburgh Penguins logo"
+        >
+        <h2>Player Impact</h2>
+    </div>
     <p><a href="{{ url_for('about') }}">About this dashboard</a></p>
     <table>
         <thead>
