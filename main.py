@@ -8,3 +8,8 @@ app = Flask(__name__, template_folder="app/templates", static_folder="app/static
 def home():
     players = get_penguins_player_impact_rows()
     return render_template("index.html", players=players)
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
