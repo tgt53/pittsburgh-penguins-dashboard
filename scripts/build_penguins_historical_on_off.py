@@ -22,7 +22,9 @@ FIELDS = [
     "Off-ice minutes", "xGF on total", "xGA on total",
     "On-ice xG differential", "xGF off total", "xGA off total",
     "Off-ice xG differential", "xGF on per 60",
-    "xGA on per 60", "xGF off per 60", "xGA off per 60",
+    "xGA on per 60", "On-ice xG differential per 60",
+    "xGF off per 60", "xGA off per 60",
+    "Off-ice xG differential per 60",
 ]
 
 
@@ -64,8 +66,10 @@ def main() -> None:
                 "Off-ice xG differential": round(number(row, "OffIce_F_xGoals") - number(row, "OffIce_A_xGoals"), 2),
                 "xGF on per 60": round(number(row, "OnIce_F_xGoals") * 60 / on_minutes, 3) if on_minutes else 0,
                 "xGA on per 60": round(number(row, "OnIce_A_xGoals") * 60 / on_minutes, 3) if on_minutes else 0,
+                "On-ice xG differential per 60": round((number(row, "OnIce_F_xGoals") - number(row, "OnIce_A_xGoals")) * 60 / on_minutes, 3) if on_minutes else 0,
                 "xGF off per 60": round(number(row, "OffIce_F_xGoals") * 60 / off_minutes, 3) if off_minutes else 0,
                 "xGA off per 60": round(number(row, "OffIce_A_xGoals") * 60 / off_minutes, 3) if off_minutes else 0,
+                "Off-ice xG differential per 60": round((number(row, "OffIce_F_xGoals") - number(row, "OffIce_A_xGoals")) * 60 / off_minutes, 3) if off_minutes else 0,
             }
             output_rows.append(record)
 

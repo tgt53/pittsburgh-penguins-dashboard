@@ -24,14 +24,14 @@
         <div class="filters"><label>Season <select id="season-filter"><option value="">All seasons</option></select></label><label>Minimum games <select id="games-filter"><option value="10" selected>10 games</option><option value="20">20 games</option><option value="40">40 games</option><option value="0">Show all</option></select></label><label>Player <input id="player-filter" type="search" placeholder="Search a player"></label></div>
     </div>
     <div class="table-scroll"><table id="data-table">
-        <thead><tr><th>Season</th><th>Player</th><th>Pos.</th><th>GP</th><th>On ice xGF</th><th>On ice xGA</th><th>On-ice xG diff.</th><th>Off ice xGF</th><th>Off ice xGA</th><th>Off-ice xG diff.</th><th>On xGF/60</th><th>On xGA/60</th><th>Off xGF/60</th><th>Off xGA/60</th></tr></thead>
+        <thead><tr><th>Season</th><th>Player</th><th>Pos.</th><th>GP</th><th>On ice xGF</th><th>On ice xGA</th><th>On-ice xG diff.</th><th>Off ice xGF</th><th>Off ice xGA</th><th>Off-ice xG diff.</th><th>On xGF/60</th><th>On xGA/60</th><th>On diff./60</th><th>Off xGF/60</th><th>Off xGA/60</th><th>Off diff./60</th></tr></thead>
         <tbody>{% for row in rows %}<tr data-season="{{ row['Season'] }}" data-player="{{ row['Player']|lower }}" data-games="{{ row['Games'] }}">
             <td>{{ row['Season'] }}</td><td>{{ row['Player'] }}</td><td>{{ row['Position'] }}</td><td>{{ row['Games'] }}</td>
             <td>{{ row['xGF on total'] }}</td><td>{{ row['xGA on total'] }}</td><td>{{ row['On-ice xG differential'] }}</td><td>{{ row['xGF off total'] }}</td><td>{{ row['xGA off total'] }}</td><td>{{ row['Off-ice xG differential'] }}</td>
-            <td>{{ row['xGF on per 60'] }}</td><td>{{ row['xGA on per 60'] }}</td><td>{{ row['xGF off per 60'] }}</td><td>{{ row['xGA off per 60'] }}</td>
+            <td>{{ row['xGF on per 60'] }}</td><td>{{ row['xGA on per 60'] }}</td><td>{{ row['On-ice xG differential per 60'] }}</td><td>{{ row['xGF off per 60'] }}</td><td>{{ row['xGA off per 60'] }}</td><td>{{ row['Off-ice xG differential per 60'] }}</td>
         </tr>{% endfor %}</tbody>
     </table></div>
-    <p class="table-help">Totals show expected goals during that player’s on-ice or off-ice time. xG differential is xGF minus xGA, so positive values mean expected goals for exceeded expected goals against. Per 60 columns express the totals as a rate over 60 minutes. <a href="{{ url_for('download_historical_on_off') }}">Download all rows as a CSV</a>.</p>
+    <p class="table-help">Totals show expected goals during that player’s on-ice or off-ice time. xG differential is xGF minus xGA, so positive values mean expected goals for exceeded expected goals against. Per 60 columns express the totals as a rate over 60 minutes; differential per 60 is (xGF minus xGA) per 60 minutes. <a href="{{ url_for('download_historical_on_off') }}">Download all rows as a CSV</a>.</p>
 </section>
 <p class="credit">Data: <a href="https://moneypuck.com/data.htm" target="_blank" rel="noopener">MoneyPuck season summary skater data</a>. MoneyPuck asks that its data be credited when displayed.</p>
 <script>
