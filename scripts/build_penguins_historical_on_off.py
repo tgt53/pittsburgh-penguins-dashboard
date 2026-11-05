@@ -20,7 +20,8 @@ YEARS = range(2008, 2026)  # MoneyPuck season field is the ending year.
 FIELDS = [
     "Season", "Player", "Position", "Games", "On-ice minutes",
     "Off-ice minutes", "xGF on total", "xGA on total",
-    "xGF off total", "xGA off total", "xGF on per 60",
+    "On-ice xG differential", "xGF off total", "xGA off total",
+    "Off-ice xG differential", "xGF on per 60",
     "xGA on per 60", "xGF off per 60", "xGA off per 60",
 ]
 
@@ -57,8 +58,10 @@ def main() -> None:
                 "Off-ice minutes": round(off_minutes, 2),
                 "xGF on total": round(number(row, "OnIce_F_xGoals"), 2),
                 "xGA on total": round(number(row, "OnIce_A_xGoals"), 2),
+                "On-ice xG differential": round(number(row, "OnIce_F_xGoals") - number(row, "OnIce_A_xGoals"), 2),
                 "xGF off total": round(number(row, "OffIce_F_xGoals"), 2),
                 "xGA off total": round(number(row, "OffIce_A_xGoals"), 2),
+                "Off-ice xG differential": round(number(row, "OffIce_F_xGoals") - number(row, "OffIce_A_xGoals"), 2),
                 "xGF on per 60": round(number(row, "OnIce_F_xGoals") * 60 / on_minutes, 3) if on_minutes else 0,
                 "xGA on per 60": round(number(row, "OnIce_A_xGoals") * 60 / on_minutes, 3) if on_minutes else 0,
                 "xGF off per 60": round(number(row, "OffIce_F_xGoals") * 60 / off_minutes, 3) if off_minutes else 0,

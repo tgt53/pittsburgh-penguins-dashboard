@@ -4,7 +4,7 @@ This site focuses on Pittsburgh Penguins regular-season on/off expected goals fr
 
 ## What the numbers mean
 
-Each row in the table represents one Penguins skater in one season. xGF is expected goals for; xGA is expected goals against. On-ice totals cover the time that player was on the ice. Off-ice totals cover the team's events while that player was on the bench. Per-60 rates divide the total by the relevant minutes and multiply by 60, which helps compare players and seasons with different playing time.
+Each row in the table represents one Penguins skater in one season. xGF is expected goals for; xGA is expected goals against. On-ice totals cover the time that player was on the ice. Off-ice totals cover the team's events while that player was on the bench. The on-ice and off-ice differentials equal xGF minus xGA; positive values mean xGF was higher. Per-60 rates divide the total by the relevant minutes and multiply by 60, which helps compare players and seasons with different playing time.
 
 The chart includes players who appeared in at least 10 games and weights each player's rate by their on-ice or off-ice minutes. It is a descriptive comparison, not evidence that a player caused a change.
 
