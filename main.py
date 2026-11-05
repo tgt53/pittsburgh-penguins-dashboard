@@ -1,8 +1,7 @@
 import csv
 from pathlib import Path
 
-from flask import Flask, render_template, send_file
-from app.main import get_penguins_player_impact_rows
+from flask import Flask, redirect, render_template, send_file, url_for
 
 app = Flask(__name__, template_folder="app/templates", static_folder="app/static")
 HISTORICAL_DATA = Path(__file__).parent / "data" / "penguins_on_off_xgoals_2008_09_to_2025_26.csv"
@@ -10,8 +9,7 @@ HISTORICAL_DATA = Path(__file__).parent / "data" / "penguins_on_off_xgoals_2008_
 
 @app.route("/")
 def home():
-    players = get_penguins_player_impact_rows()
-    return render_template("index.html", players=players)
+    return render_historical_on_off()
 
 
 @app.route("/about")
@@ -21,6 +19,10 @@ def about():
 
 @app.route("/on-off")
 def historical_on_off():
+    return redirect(url_for("home"))
+
+
+def render_historical_on_off():
     with HISTORICAL_DATA.open(encoding="utf-8", newline="") as source:
         rows = list(csv.DictReader(source))
     return render_template("on_off.html", rows=rows)
