@@ -20,12 +20,12 @@
 </section>
 
 <section class="panel" aria-labelledby="table-title">
-    <div class="section-title"><div><h3 id="table-title">All player-season data</h3><p id="row-count">556 player-season rows</p></div>
-        <div class="filters"><label>Season <select id="season-filter"><option value="">All seasons</option></select></label><label>Player <input id="player-filter" type="search" placeholder="Search a player"></label></div>
+    <div class="section-title"><div><h3 id="table-title">Player-season data</h3><p id="row-count">Showing players with 10+ games</p></div>
+        <div class="filters"><label>Season <select id="season-filter"><option value="">All seasons</option></select></label><label>Minimum games <select id="games-filter"><option value="10" selected>10 games</option><option value="20">20 games</option><option value="40">40 games</option><option value="0">Show all</option></select></label><label>Player <input id="player-filter" type="search" placeholder="Search a player"></label></div>
     </div>
     <div class="table-scroll"><table id="data-table">
         <thead><tr><th>Season</th><th>Player</th><th>Pos.</th><th>GP</th><th>On ice xGF</th><th>On ice xGA</th><th>Off ice xGF</th><th>Off ice xGA</th><th>On xGF/60</th><th>On xGA/60</th><th>Off xGF/60</th><th>Off xGA/60</th></tr></thead>
-        <tbody>{% for row in rows %}<tr data-season="{{ row['Season'] }}" data-player="{{ row['Player']|lower }}">
+        <tbody>{% for row in rows %}<tr data-season="{{ row['Season'] }}" data-player="{{ row['Player']|lower }}" data-games="{{ row['Games'] }}">
             <td>{{ row['Season'] }}</td><td>{{ row['Player'] }}</td><td>{{ row['Position'] }}</td><td>{{ row['Games'] }}</td>
             <td>{{ row['xGF on total'] }}</td><td>{{ row['xGA on total'] }}</td><td>{{ row['xGF off total'] }}</td><td>{{ row['xGA off total'] }}</td>
             <td>{{ row['xGF on per 60'] }}</td><td>{{ row['xGA on per 60'] }}</td><td>{{ row['xGF off per 60'] }}</td><td>{{ row['xGA off per 60'] }}</td>
@@ -42,15 +42,19 @@ seasons.forEach(s => seasonSelect.add(new Option(s, s)));
 function filterRows() {
   const season = seasonSelect.value;
   const query = document.getElementById('player-filter').value.toLowerCase().trim();
+  const minimumGames = Number(document.getElementById('games-filter').value);
   let visible = 0;
   document.querySelectorAll('#data-table tbody tr').forEach(tr => {
-    const show = (!season || tr.dataset.season === season) && tr.dataset.player.includes(query);
+    const show = (!season || tr.dataset.season === season) && tr.dataset.player.includes(query) && Number(tr.dataset.games) >= minimumGames;
     tr.hidden = !show; if (show) visible++;
   });
-  document.getElementById('row-count').textContent = `${visible} player-season row${visible === 1 ? '' : 's'}`;
+  const cutoffText = minimumGames ? ` with ${minimumGames}+ games` : '';
+  document.getElementById('row-count').textContent = `Showing ${visible} player-season row${visible === 1 ? '' : 's'}${cutoffText}`;
 }
 seasonSelect.addEventListener('change', filterRows);
+document.getElementById('games-filter').addEventListener('change', filterRows);
 document.getElementById('player-filter').addEventListener('input', filterRows);
+filterRows();
 function drawChart() {
   const metric = document.getElementById('metric-select').value;
   const qualified = rows.filter(r => Number(r.Games) >= 10);
