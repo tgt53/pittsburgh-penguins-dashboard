@@ -5,5 +5,10 @@
 {% block content %}
     <h2>About this dashboard</h2>
     <p>This dashboard presents Pittsburgh Penguins player impact data from MoneyPuck.</p>
+    <h3>Historical on/off expected goals</h3>
+    <p>The historical page covers the regular seasons from 2008–09 through 2025–26. Each table row represents one Penguin in one season. “On ice” is expected goals for and against while that player was on the ice. “Off ice” is the team's expected goals for and against while that player was on the bench.</p>
+    <p>The totals are MoneyPuck's xGoals values. The per-60 figures are calculated by dividing each total by the relevant ice or bench minutes and multiplying by 60. The season chart includes players who appeared in at least 10 games, and combines their rates weighted by minutes. It describes what happened during those situations; it does not establish that an individual player caused the difference.</p>
+    <p>To prepare the data, the project downloads MoneyPuck's public regular-season skater CSV for each ending year from 2008 through 2025, keeps Pittsburgh's “all situations” rows, and selects the on-ice and off-ice xGoals and time columns. The source files include multiple situations, so using “all” avoids counting the same player multiple times. The prepared dataset has 556 player-season rows.</p>
+    <p>Source: <a href="https://moneypuck.com/data.htm">MoneyPuck data downloads</a>. MoneyPuck requests clear credit whenever its data is shown.</p>
     <p><a href="{{ url_for('home') }}">Back to player impact</a></p>
 {% endblock %}

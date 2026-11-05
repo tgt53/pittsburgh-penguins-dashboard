@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Historical On/Off Expected Goals | Pittsburgh Penguins{% endblock %}
+
+{% block content %}
+<section class="intro">
+    <p class="eyebrow">MoneyPuck · Regular season · 2008–09 to 2025–26</p>
+    <h2>Penguins on-ice and off-ice expected goals</h2>
+    <p>Compare how many expected goals Pittsburgh generated and allowed while a player was on the ice, and while that player was on the bench. Rates are shown per 60 minutes so seasons and players with different ice time are easier to compare.</p>
+</section>
+
+<section class="panel" aria-labelledby="trend-title">
+    <div class="section-title">
+        <div><h3 id="trend-title">Season trend</h3><p>Ice-time-weighted rate across Penguins with at least 10 games that season.</p></div>
+        <label>Show <select id="metric-select"><option value="xGF">Expected goals for (xGF)</option><option value="xGA">Expected goals against (xGA)</option></select></label>
+    </div>
+    <div class="chart-legend"><span><i class="dot on"></i>Player on ice</span><span><i class="dot off"></i>Player off ice</span></div>
+    <div class="chart-wrap"><svg id="trend-chart" role="img" aria-label="Season trend chart of on-ice and off-ice expected goals per 60 minutes"></svg></div>
+    <p class="chart-note">The off-ice figures describe team expected goals during that player’s bench time; each player has a different sample. Season lines are weighted by each qualifying player's minutes, and are descriptive comparisons rather than proof that a player caused the difference.</p>
+</section>
+
+<section class="panel" aria-labelledby="table-title">
+    <div class="section-title"><div><h3 id="table-title">All player-season data</h3><p id="row-count">556 player-season rows</p></div>
+        <div class="filters"><label>Season <select id="season-filter"><option value="">All seasons</option></select></label><label>Player <input id="player-filter" type="search" placeholder="Search a player"></label></div>
+    </div>
+    <div class="table-scroll"><table id="data-table">
+        <thead><tr><th>Season</th><th>Player</th><th>Pos.</th><th>GP</th><th>On ice xGF</th><th>On ice xGA</th><th>Off ice xGF</th><th>Off ice xGA</th><th>On xGF/60</th><th>On xGA/60</th><th>Off xGF/60</th><th>Off xGA/60</th></tr></thead>
+        <tbody>{% for row in rows %}<tr data-season="{{ row['Season'] }}" data-player="{{ row['Player']|lower }}">
+            <td>{{ row['Season'] }}</td><td>{{ row['Player'] }}</td><td>{{ row['Position'] }}</td><td>{{ row['Games'] }}</td>
+            <td>{{ row['xGF on total'] }}</td><td>{{ row['xGA on total'] }}</td><td>{{ row['xGF off total'] }}</td><td>{{ row['xGA off total'] }}</td>
+            <td>{{ row['xGF on per 60'] }}</td><td>{{ row['xGA on per 60'] }}</td><td>{{ row['xGF off per 60'] }}</td><td>{{ row['xGA off per 60'] }}</td>
+        </tr>{% endfor %}</tbody>
+    </table></div>
+    <p class="table-help">Totals show expected goals during that player’s on-ice or off-ice time. Per 60 columns express the same amount as a rate over 60 minutes. <a href="{{ url_for('download_historical_on_off') }}">Download all rows as a CSV</a>.</p>
+</section>
+<p class="credit">Data: <a href="https://moneypuck.com/data.htm" target="_blank" rel="noopener">MoneyPuck season summary skater data</a>. MoneyPuck asks that its data be credited when displayed.</p>
+<script>
+const rows = {{ rows|tojson }};
+const seasonSelect = document.getElementById('season-filter');
+const seasons = [...new Set(rows.map(r => r.Season))];
+seasons.forEach(s => seasonSelect.add(new Option(s, s)));
+function filterRows() {
+  const season = seasonSelect.value;
+  const query = document.getElementById('player-filter').value.toLowerCase().trim();
+  let visible = 0;
+  document.querySelectorAll('#data-table tbody tr').forEach(tr => {
+    const show = (!season || tr.dataset.season === season) && tr.dataset.player.includes(query);
+    tr.hidden = !show; if (show) visible++;
+  });
+  document.getElementById('row-count').textContent = `${visible} player-season row${visible === 1 ? '' : 's'}`;
+}
+seasonSelect.addEventListener('change', filterRows);
+document.getElementById('player-filter').addEventListener('input', filterRows);
+function drawChart() {
+  const metric = document.getElementById('metric-select').value;
+  const qualified = rows.filter(r => Number(r.Games) >= 10);
+  const summaries = seasons.map(season => {
+    const group = qualified.filter(r => r.Season === season);
+    const weighted = (key, minutes) => group.reduce((sum, r) => sum + Number(r[key]) * Number(r[minutes]), 0) / (group.reduce((sum, r) => sum + Number(r[minutes]), 0) || 1);
+    return {season, on: weighted(`${metric} on per 60`, 'On-ice minutes'), off: weighted(`${metric} off per 60`, 'Off-ice minutes')};
+  });
+  const svg = document.getElementById('trend-chart'), w = Math.max(640, svg.parentElement.clientWidth), h = 320;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.replaceChildren();
+  const max = Math.ceil(Math.max(...summaries.flatMap(d => [d.on, d.off])) * 2) / 2;
+  const left = 48, right = 12, top = 16, bottom = 46, x = i => left + i * (w-left-right)/(summaries.length-1), y = v => top + (max-v)*(h-top-bottom)/max;
+  const make = (tag, attrs) => { const el = document.createElementNS('http://www.w3.org/2000/svg', tag); Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v)); svg.append(el); return el; };
+  for (let tick=0; tick<=max; tick+=max/4) { make('line',{x1:left,y1:y(tick),x2:w-right,y2:y(tick),class:'gridline'}); const t=make('text',{x:left-8,y:y(tick)+4,'text-anchor':'end',class:'axis-label'}); t.textContent=tick.toFixed(1); }
+  [['on','chart-on'],['off','chart-off']].forEach(([key,cls]) => {
+    make('polyline',{points:summaries.map((d,i)=>`${x(i)},${y(d[key])}`).join(' '),class:cls,fill:'none'});
+    summaries.forEach((d,i)=>make('circle',{cx:x(i),cy:y(d[key]),r:3.5,class:cls}));
+  });
+  summaries.forEach((d,i)=>{ if (i%2===0 || i===summaries.length-1) { const t=make('text',{x:x(i),y:h-17,'text-anchor':'middle',class:'axis-label'}); t.textContent=d.season; }});
+}
+document.getElementById('metric-select').addEventListener('change', drawChart);
+window.addEventListener('resize', drawChart); drawChart();
+</script>
+{% endblock %}

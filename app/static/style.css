@@ -5,6 +5,39 @@ body {
     margin: 2rem;
 }
 
+header { border-bottom: 3px solid #c6a76b; margin: -2rem -2rem 2rem; padding: 1.25rem 2rem 0.75rem; background: #101820; color: #fff; }
+header h1 { margin: 0 0 .7rem; }
+nav { display: flex; flex-wrap: wrap; gap: 1.2rem; }
+nav a { color: #fff; }
+a { color: #174a70; }
+.intro { max-width: 900px; margin-bottom: 1.5rem; }
+.intro h2 { font-size: clamp(1.6rem, 4vw, 2.5rem); margin: .2rem 0 .65rem; }
+.eyebrow { color: #485b6c; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: .82rem; }
+.panel { background: #fff; border: 1px solid #d8dee5; border-radius: .5rem; padding: 1.25rem; margin: 1.2rem 0; }
+.section-title { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 1rem; }
+.section-title h3 { margin: 0 0 .35rem; }
+.section-title p, .chart-note, .table-help { color: #4a5560; }
+.section-title p { margin: 0; }
+.filters { display: flex; flex-wrap: wrap; gap: .8rem; }
+label { display: inline-flex; align-items: center; gap: .45rem; }
+select, input { font: inherit; padding: .4rem .5rem; border: 1px solid #98a4ad; border-radius: .25rem; background: white; }
+.chart-legend { display: flex; gap: 1.25rem; margin: 1rem 0 .25rem; font-size: .9rem; }
+.dot { display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .4rem; background: #155b8a; }
+.dot.off { background: #c38d2c; }
+.chart-wrap { width: 100%; overflow-x: auto; }
+#trend-chart { display: block; width: 100%; min-width: 640px; height: 320px; }
+.gridline { stroke: #e1e6eb; stroke-width: 1; }
+.axis-label { fill: #4a5560; font: 11px Arial, sans-serif; }
+.chart-on { stroke: #155b8a; fill: #155b8a; stroke-width: 3; }
+.chart-off { stroke: #c38d2c; fill: #c38d2c; stroke-width: 3; }
+.chart-note { font-size: .9rem; margin-bottom: 0; }
+.table-scroll { overflow: auto; margin-top: 1rem; }
+#data-table { min-width: 1040px; font-size: .9rem; }
+#data-table th { position: sticky; top: 0; }
+tr[hidden] { display: none; }
+.table-help, .credit { font-size: .9rem; }
+.credit { margin: 1.2rem 0 2rem; }
+
 .page-heading {
     display: flex;
     align-items: center;

@@ -2,6 +2,12 @@
 
 ## MoneyPuck player impact walkthrough
 
+### Historical on/off expected goals (2008-09 to 2025-26)
+
+The dashboard's **Historical on/off xGoals** page shows each Penguins skater's season totals and per-60-minute rates for expected goals for (xGF) and against (xGA), both while on the ice and while on the bench. Use its season dropdown and player search to narrow the table, or download the complete CSV.
+
+To refresh the dataset, run `python scripts/build_penguins_historical_on_off.py` from the project folder. The script downloads MoneyPuck's listed regular-season `skaters.csv` for each season year 2008 through 2025, keeps Pittsburgh rows marked `situation=all`, and reads on-ice and off-ice xGoals plus ice/bench time. Per-60 rates equal total xGoals divided by minutes and multiplied by 60. The chart combines players with 10 or more games, weighting each rate by the corresponding minutes. The output contains 556 player-season rows. MoneyPuck asks for clear credit when its data is displayed; the dashboard links to the source.
+
 Start with [`notebooks/moneypuck_penguins_impact.ipynb`](notebooks/moneypuck_penguins_impact.ipynb). The notebook explains each step in plain English and includes the raw data preview, cleaned player table, data checks, chart, and short summary. It uses MoneyPuck's 2025-26 regular season Pittsburgh skater CSV.
 
 ### Open and run it
