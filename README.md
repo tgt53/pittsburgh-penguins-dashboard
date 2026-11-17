@@ -26,7 +26,7 @@ Run this to rebuild the season-by-season on/off xG file used by player profiles:
 python scripts/build_moneypuck_all_player_on_off.py
 ```
 
-This downloads MoneyPuck's public regular-season skater summaries for all teams from 2007–08 through 2026–27 and writes player/team/season rows to `data/moneypuck_all_players_on_off_xgoals_2007_08_to_2026_27.csv`. The generated file currently contains 17,899 rows. MoneyPuck's current season file is updated during the season; rerun the command to refresh it. Goalies do not have these skater on/off measures.
+This downloads MoneyPuck's public regular-season skater summaries for all teams from 2007–08 through 2026–27 and writes player/team/season rows to `data/moneypuck_all_players_on_off_xgoals_2007_08_to_2026_27.csv`. The profile API automatically checks for a current-season refresh when requested, at most once every six hours per app process, and replaces that season's rows in the CSV. New data appears after MoneyPuck publishes it and the refresh completes; it is not a live game feed. The host must allow outbound requests to MoneyPuck and writes to the data file. You can still run the command above to rebuild all seasons manually. Goalies do not have these skater on/off measures.
 
 ## Refresh the standard player stats
 

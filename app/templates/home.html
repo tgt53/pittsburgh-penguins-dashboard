@@ -49,7 +49,9 @@ function renderPlayer(p) {
   const meta = document.createElement('span'); meta.className = 'player-meta';
   const label = document.createElement('span'); label.className = 'player-name'; label.textContent = name;
   const pos = document.createElement('span'); pos.className = 'player-position';
-  pos.textContent = [p.sweaterNumber ? `#${p.sweaterNumber}` : '', p.positionCode || p.position || ''].filter(Boolean).join(' · ');
+  const rawPosition = p.positionCode || p.position || '';
+  const position = rawPosition === 'L' ? 'LW' : rawPosition === 'R' ? 'RW' : rawPosition;
+  pos.textContent = [p.sweaterNumber ? `#${p.sweaterNumber}` : '', position].filter(Boolean).join(' · ');
   meta.append(label, pos); card.append(image, meta); return card;
 }
 fetch(`/api/roster/${seasonId}`)
@@ -63,7 +65,7 @@ fetch(`/api/roster/${seasonId}`)
       count += players.length;
       if (!players.length) grid.closest('.roster-section').hidden = true;
     });
-    rosterStatus.textContent = `${count} players on the ${seasonId.slice(0,4)}–${seasonId.slice(4)} roster. Select a player to see their NHL profile and stats.`;
+    rosterStatus.textContent = `${count} Penguins roster players and players who have appeared in at least one game this season. Select a player to see their NHL profile and stats.`;
   })
   .catch(error => { rosterStatus.textContent = `The roster could not be loaded. ${error.message}`; });
 </script>
