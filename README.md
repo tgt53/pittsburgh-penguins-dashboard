@@ -18,6 +18,16 @@ python scripts/build_penguins_historical_on_off.py
 
 The script downloads MoneyPuck's public regular-season skater CSV for each season year 2008 through 2025. It keeps Pittsburgh rows marked `situation=all`, selects on-ice and off-ice expected goals and time, and writes one row per player per season to `data/penguins_on_off_xgoals_2008_09_to_2025_26.csv`. The current file has 556 rows across 18 seasons.
 
+## Refresh all-player on/off expected goals
+
+Run this to rebuild the season-by-season on/off xG file used by player profiles:
+
+```powershell
+python scripts/build_moneypuck_all_player_on_off.py
+```
+
+This downloads MoneyPuck's public regular-season skater summaries for all teams from 2007–08 through 2026–27 and writes player/team/season rows to `data/moneypuck_all_players_on_off_xgoals_2007_08_to_2026_27.csv`. The generated file currently contains 17,899 rows. MoneyPuck's current season file is updated during the season; rerun the command to refresh it. Goalies do not have these skater on/off measures.
+
 ## Refresh the standard player stats
 
 After rebuilding the MoneyPuck file, run:

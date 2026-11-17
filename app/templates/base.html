@@ -17,7 +17,8 @@
             <span><b>PITTSBURGH</b><small>PENGUINS DATA</small></span>
         </a>
         <nav aria-label="Main navigation">
-            <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Dashboard</a>
+            <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Players</a>
+            <a class="nav-link {% if request.endpoint == 'historical_on_off' %}active{% endif %}" href="{{ url_for('historical_on_off') }}">On/Off data</a>
             <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">About</a>
             <a class="nav-cta" href="{{ url_for('download_historical_on_off') }}">Download data <span aria-hidden="true">↗</span></a>
         </nav>

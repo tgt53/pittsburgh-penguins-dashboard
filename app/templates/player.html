@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Player Profile | Pittsburgh Penguins{% endblock %}
+
+{% block content %}
+<section class="player-profile" id="profile" data-player-id="{{ player_id }}">
+    <a class="back-link" href="{{ url_for('home') }}">← Back to roster</a>
+    <div id="profile-status" class="roster-status" role="status" aria-live="polite">Loading player profile…</div>
+    <div id="profile-content" hidden>
+        <div class="profile-hero">
+            <div class="profile-copy"><p class="eyebrow" id="profile-team">Pittsburgh Penguins</p><h1 id="profile-name"></h1><p class="profile-number" id="profile-number"></p>
+                <div class="bio-facts" id="bio-facts"></div>
+            </div>
+            <img id="profile-headshot" class="profile-headshot" alt="">
+        </div>
+        <section class="stats-panel" aria-labelledby="season-stats-title">
+            <div class="section-title"><div><p class="eyebrow">Every NHL stop</p><h2 id="season-stats-title">Season stats</h2><p>Regular season stats by team, including seasons split across teams. On/off xG is shown where MoneyPuck has a skater season row.</p></div></div>
+            <div class="table-scroll"><table class="profile-stats compact-stats"><thead><tr><th>Season</th><th>Team</th><th>GP</th><th>G</th><th>A</th><th>PTS</th><th>+/-</th><th>PIM</th><th>PPG</th><th>PPP</th><th>SHG</th><th>GWG</th><th>Shots</th><th>S%</th><th>FO%</th><th>TOI/GP</th><th>On diff./60</th><th>Off diff./60</th></tr></thead><tbody id="season-rows"></tbody></table></div>
+            <details class="xg-details">
+                <summary>Full on/off xG breakdown</summary>
+                <div class="table-scroll"><table class="profile-stats"><thead><tr><th>Season</th><th>Team</th><th>On ice xGF</th><th>On ice xGA</th><th>On-ice xG diff.</th><th>Off ice xGF</th><th>Off ice xGA</th><th>Off-ice xG diff.</th><th>On xGF/60</th><th>On xGA/60</th><th>On diff./60</th><th>Off xGF/60</th><th>Off xGA/60</th><th>Off diff./60</th></tr></thead><tbody id="xg-rows"></tbody></table></div>
+            </details>
+        </section>
+        <section class="stats-panel" aria-labelledby="career-stats-title">
+            <div class="section-title"><div><p class="eyebrow">Career totals</p><h2 id="career-stats-title">NHL career</h2></div></div>
+            <div id="career-stats" class="career-stats"></div>
+        </section>
+        <p class="roster-credit">Player details and standard statistics from the <a href="https://www.nhl.com/stats/" target="_blank" rel="noopener">NHL</a>. On/off expected-goals data from <a href="https://moneypuck.com/data.htm" target="_blank" rel="noopener">MoneyPuck</a> (skater seasons from 2007–08 through 2026–27). MoneyPuck asks that its data be credited when displayed.</p>
+    </div>
+</section>
+<script>
+const playerId = document.getElementById('profile').dataset.playerId;
+const statusBox = document.getElementById('profile-status');
+const profileContent = document.getElementById('profile-content');
+const safe = value => value && typeof value === 'object' ? (value.default || '') : (value ?? '');
+const stat = (value, digits = 0) => value === undefined || value === null || value === '' ? '—' : (typeof value === 'number' ? value.toFixed(digits) : value);
+const teamAbbrevs = {
+  'Anaheim Ducks':'ANA','Mighty Ducks of Anaheim':'ANA','Atlanta Thrashers':'ATL','Arizona Coyotes':'ARI','Phoenix Coyotes':'PHX','Boston Bruins':'BOS','Buffalo Sabres':'BUF','Calgary Flames':'CGY','Carolina Hurricanes':'CAR','Chicago Blackhawks':'CHI','Colorado Avalanche':'COL','Columbus Blue Jackets':'CBJ','Dallas Stars':'DAL','Detroit Red Wings':'DET','Edmonton Oilers':'EDM','Florida Panthers':'FLA','Los Angeles Kings':'LAK','Minnesota Wild':'MIN','Montreal Canadiens':'MTL','Nashville Predators':'NSH','New Jersey Devils':'NJD','New York Islanders':'NYI','New York Rangers':'NYR','Ottawa Senators':'OTT','Philadelphia Flyers':'PHI','Pittsburgh Penguins':'PIT','San Jose Sharks':'SJS','Seattle Kraken':'SEA','St. Louis Blues':'STL','Tampa Bay Lightning':'TBL','Toronto Maple Leafs':'TOR','Utah Hockey Club':'UTA','Utah Mammoth':'UTA','Vancouver Canucks':'VAN','Vegas Golden Knights':'VGK','Washington Capitals':'WSH','Winnipeg Jets':'WPG'
+};
+function teamLabel(row) {
+  return safe(row.teamName) || safe(row.teamCommonName) || safe(row.teamPlaceName) || row.teamAbbrev || '—';
+}
+function teamLogo(row) {
+  const abbreviation = teamAbbreviation(row);
+  return abbreviation ? `https://assets.nhle.com/logos/nhl/svg/${abbreviation}_light.svg` : '';
+}
+function teamAbbreviation(row) {
+  return row.teamAbbrev || (row.teamCommonName?.default && teamAbbrevs[`${row.teamPlaceName?.default || ''} ${row.teamCommonName.default}`.trim()]) || teamAbbrevs[teamLabel(row)] || '';
+}
+function addFact(label, value) {
+  if (!value) return;
+  const item = document.createElement('div'); item.className = 'bio-fact';
+  const key = document.createElement('span'); key.textContent = label;
+  const val = document.createElement('b'); val.textContent = value;
+  item.append(key, val); document.getElementById('bio-facts').append(item);
+}
+function ageAtToday(birthDate) {
+  if (!birthDate) return '';
+  const birth = new Date(`${birthDate}T00:00:00`), today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
+  return `${age}`;
+}
+const xgFields = ['xGF on total','xGA on total','On-ice xG differential','xGF off total','xGA off total','Off-ice xG differential','xGF on per 60','xGA on per 60','On-ice xG differential per 60','xGF off per 60','xGA off per 60','Off-ice xG differential per 60'];
+function appendSeasonTeam(tr, row) {
+  const seasonCell = document.createElement('td');
+  seasonCell.textContent = `${String(row.season).slice(0,4)}–${String(row.season).slice(4)}`;
+  const teamCell = document.createElement('td'); teamCell.className = 'team-cell';
+  const logo = teamLogo(row);
+  if (logo) { const img = document.createElement('img'); img.src = logo; img.alt = ''; img.className = 'inline-team-logo'; img.onerror = () => img.remove(); teamCell.append(img); }
+  const teamText = document.createElement('span'); teamText.textContent = teamLabel(row); teamCell.append(teamText);
+  tr.append(seasonCell, teamCell);
+}
+function fillSeasonRow(row, penguinsXg) {
+  const tr = document.createElement('tr');
+  appendSeasonTeam(tr, row);
+  [row.gamesPlayed,row.goals,row.assists,row.points,row.plusMinus,row.pim,row.powerPlayGoals,row.powerPlayPoints,row.shorthandedGoals,row.gameWinningGoals,row.shots,
+   row.shootingPctg == null ? '—' : `${(row.shootingPctg * 100).toFixed(1)}%`,
+   row.faceoffWinningPctg == null ? '—' : `${(row.faceoffWinningPctg * 100).toFixed(1)}%`,row.avgToi].forEach(value => { const td=document.createElement('td'); td.textContent=stat(value); tr.append(td); });
+  ['On-ice xG differential per 60','Off-ice xG differential per 60'].forEach(field => { const td=document.createElement('td'); td.textContent=penguinsXg ? stat(penguinsXg[field], 3) : '—'; tr.append(td); });
+  return tr;
+}
+function fillXgRow(row, penguinsXg) {
+  const tr = document.createElement('tr');
+  appendSeasonTeam(tr, row);
+  xgFields.forEach(field => { const td=document.createElement('td'); td.textContent=penguinsXg ? stat(penguinsXg[field], 3) : '—'; tr.append(td); });
+  return tr;
+}
+function addCareerTotals(title, totals) {
+  if (!totals) return;
+  const group = document.createElement('div'); group.className = 'career-group';
+  const heading = document.createElement('h3'); heading.textContent = title; group.append(heading);
+  const values = [['GP',totals.gamesPlayed],['G',totals.goals],['A',totals.assists],['PTS',totals.points],['+/-',totals.plusMinus],['PIM',totals.pim],['PPG',totals.powerPlayGoals],['PPP',totals.powerPlayPoints],['SHG',totals.shorthandedGoals],['GWG',totals.gameWinningGoals],['Shots',totals.shots],['S%',totals.shootingPctg == null ? '—' : `${(totals.shootingPctg*100).toFixed(1)}%`],['FO%',totals.faceoffWinningPctg == null ? '—' : `${(totals.faceoffWinningPctg*100).toFixed(1)}%`],['TOI/GP',totals.avgToi]];
+  values.forEach(([label,value]) => { if (value === undefined || value === null) return; const card=document.createElement('div'); card.className='career-stat'; const key=document.createElement('span'); key.textContent=label; const val=document.createElement('b'); val.textContent=stat(value); card.append(key,val); group.append(card); });
+  document.getElementById('career-stats').append(group);
+}
+fetch(`/api/player/${playerId}`)
+  .then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || `Player unavailable (HTTP ${response.status}).`); return data; })
+  .then(async player => {
+    document.title = `${safe(player.firstName)} ${safe(player.lastName)} | Pittsburgh Penguins`;
+    document.getElementById('profile-name').textContent = `${safe(player.firstName)} ${safe(player.lastName)}`;
+    document.getElementById('profile-team').textContent = safe(player.fullTeamName) || 'NHL Player';
+    document.getElementById('profile-number').textContent = player.sweaterNumber ? `#${player.sweaterNumber} · ${player.position || ''}` : (player.position || '');
+    const photo = document.getElementById('profile-headshot'); photo.src = player.headshot || '';
+    photo.alt = `${safe(player.firstName)} ${safe(player.lastName)}`;
+    photo.onerror = () => { photo.src = '/static/images/penguins_logo.png'; photo.classList.add('headshot-fallback'); };
+    addFact('Height', player.heightInInches ? `${Math.floor(player.heightInInches/12)}′ ${player.heightInInches%12}″` : '');
+    addFact('Weight', player.weightInPounds ? `${player.weightInPounds} lb` : '');
+    addFact('Age', ageAtToday(player.birthDate));
+    addFact('Born', player.birthDate ? `${player.birthDate.slice(5,7)}/${player.birthDate.slice(8,10)}/${player.birthDate.slice(0,4)}` : '');
+    addFact(player.position === 'G' ? 'Catches' : 'Shoots', player.shootsCatches || '');
+    addFact('Birthplace', [safe(player.birthCity),safe(player.birthStateProvince),player.birthCountry].filter(Boolean).join(', '));
+    const xgResponse = await fetch(`/api/moneypuck/on-off/${playerId}`);
+    const xgRows = xgResponse.ok ? await xgResponse.json() : [];
+    const xgBySeason = new Map(xgRows.map(row => [`${row.Season}|${row.Team}`, row]));
+    const seasons = (player.seasonTotals || []).filter(row => row.leagueAbbrev === 'NHL' && row.gameTypeId === 2).sort((a,b) => a.season-b.season || (a.sequence||0)-(b.sequence||0));
+    const body = document.getElementById('season-rows');
+    const xgBody = document.getElementById('xg-rows');
+    seasons.forEach(row => {
+      const season = `${String(row.season).slice(0,4)}-${String(row.season).slice(4)}`;
+      const xgRow = xgBySeason.get(`${season}|${teamAbbreviation(row)}`);
+      body.append(fillSeasonRow(row, xgRow));
+      xgBody.append(fillXgRow(row, xgRow));
+    });
+    if (!seasons.length) { const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=18; td.textContent='No NHL regular-season stats available yet.'; tr.append(td); body.append(tr); }
+    addCareerTotals('Regular season', player.careerTotals?.regularSeason);
+    addCareerTotals('Playoffs', player.careerTotals?.playoffs);
+    statusBox.hidden = true; profileContent.hidden = false;
+  })
+  .catch(error => { statusBox.textContent = `This NHL player profile could not be loaded. ${error.message}`; });
+</script>
+{% endblock %}

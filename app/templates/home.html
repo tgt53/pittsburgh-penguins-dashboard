@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Pittsburgh Penguins | Player Roster{% endblock %}
+
+{% block content %}
+<section class="roster-hero">
+    <p class="eyebrow">{{ season_label }} season · player roster</p>
+    <h1>Pittsburgh<br><em>Penguins</em></h1>
+    <p>Meet the players wearing the black and gold this season.</p>
+    <a class="roster-scroll" href="#forwards">Explore the roster <span aria-hidden="true">↓</span></a>
+    <img class="hero-mark" src="{{ url_for('static', filename='images/penguins_logo.png') }}" alt="" aria-hidden="true">
+</section>
+
+<div id="roster-status" class="roster-status" role="status" aria-live="polite">Loading the {{ season_label }} roster…</div>
+<div id="roster-groups" class="roster-groups" data-season-id="{{ season_id }}">
+    <section class="roster-section" id="forwards" aria-labelledby="forwards-title">
+        <div class="roster-section-heading"><h2 id="forwards-title">Forwards</h2></div>
+        <div class="player-grid" data-position="forwards"></div>
+    </section>
+    <section class="roster-section" id="defense" aria-labelledby="defense-title">
+        <div class="roster-section-heading"><h2 id="defense-title">Defense</h2></div>
+        <div class="player-grid" data-position="defensemen"></div>
+    </section>
+    <section class="roster-section" id="goalies" aria-labelledby="goalies-title">
+        <div class="roster-section-heading"><h2 id="goalies-title">Goalies</h2></div>
+        <div class="player-grid" data-position="goalies"></div>
+    </section>
+</div>
+<p class="roster-credit">Roster, biographies, and headshots provided by the <a href="https://www.nhl.com/penguins/roster" target="_blank" rel="noopener">NHL and Pittsburgh Penguins</a>.</p>
+<script>
+const seasonId = document.getElementById('roster-groups').dataset.seasonId;
+const rosterStatus = document.getElementById('roster-status');
+function playerName(p) {
+  const first = p.firstName?.default || p.firstName || '';
+  const last = p.lastName?.default || p.lastName || '';
+  return `${first} ${last}`.trim();
+}
+function renderPlayer(p) {
+  const name = playerName(p);
+  const id = p.id || p.playerId;
+  const photo = p.headshot || `https://assets.nhle.com/mugs/nhl/${seasonId}/PIT/${id}.png`;
+  const card = document.createElement('a');
+  card.className = 'player-card';
+  card.href = `/players/${id}`;
+  card.setAttribute('aria-label', `View ${name}'s player profile`);
+  const image = document.createElement('img');
+  image.className = 'player-headshot'; image.src = photo; image.alt = '';
+  image.loading = 'lazy'; image.onerror = () => { image.src = '/static/images/penguins_logo.png'; image.classList.add('headshot-fallback'); };
+  const meta = document.createElement('span'); meta.className = 'player-meta';
+  const label = document.createElement('span'); label.className = 'player-name'; label.textContent = name;
+  const pos = document.createElement('span'); pos.className = 'player-position';
+  pos.textContent = [p.sweaterNumber ? `#${p.sweaterNumber}` : '', p.positionCode || p.position || ''].filter(Boolean).join(' · ');
+  meta.append(label, pos); card.append(image, meta); return card;
+}
+fetch(`/api/roster/${seasonId}`)
+  .then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || `Roster unavailable (HTTP ${response.status}).`); return data; })
+  .then(roster => {
+    let count = 0;
+    ['forwards', 'defensemen', 'goalies'].forEach(group => {
+      const grid = document.querySelector(`[data-position="${group}"]`);
+      const players = (roster[group] || []).slice().sort((a, b) => playerName(a).localeCompare(playerName(b)));
+      players.forEach(p => grid.append(renderPlayer(p)));
+      count += players.length;
+      if (!players.length) grid.closest('.roster-section').hidden = true;
+    });
+    rosterStatus.textContent = `${count} players on the ${seasonId.slice(0,4)}–${seasonId.slice(4)} roster. Select a player to see their NHL profile and stats.`;
+  })
+  .catch(error => { rosterStatus.textContent = `The roster could not be loaded. ${error.message}`; });
+</script>
+{% endblock %}
