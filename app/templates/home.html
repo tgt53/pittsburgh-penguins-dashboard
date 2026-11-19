@@ -4,36 +4,37 @@
 
 {% block content %}
 <section class="roster-hero">
-    <p class="eyebrow">{{ season_label }} season · player roster</p>
     <h1>Pittsburgh<br><em>Penguins</em></h1>
-    <p>Meet the players wearing the black and gold this season.</p>
-    <a class="roster-scroll" href="#forwards">Explore the roster <span aria-hidden="true">↓</span></a>
+    <a class="roster-scroll" href="#forwards">Explore the roster</a>
     <img class="hero-mark" src="{{ url_for('static', filename='images/penguins_logo.png') }}" alt="" aria-hidden="true">
 </section>
 
-<div id="roster-status" class="roster-status" role="status" aria-live="polite">Loading the {{ season_label }} roster…</div>
 <div id="roster-groups" class="roster-groups" data-season-id="{{ season_id }}">
     <section class="roster-section" id="forwards" aria-labelledby="forwards-title">
-        <div class="roster-section-heading"><h2 id="forwards-title">Forwards</h2></div>
+        <div class="roster-section-heading"><h2 id="forwards-title">Forwards <span class="roster-count" data-count-for="forwards"></span></h2></div>
         <div class="player-grid" data-position="forwards"></div>
     </section>
     <section class="roster-section" id="defense" aria-labelledby="defense-title">
-        <div class="roster-section-heading"><h2 id="defense-title">Defense</h2></div>
+        <div class="roster-section-heading"><h2 id="defense-title">Defense <span class="roster-count" data-count-for="defensemen"></span></h2></div>
         <div class="player-grid" data-position="defensemen"></div>
     </section>
     <section class="roster-section" id="goalies" aria-labelledby="goalies-title">
-        <div class="roster-section-heading"><h2 id="goalies-title">Goalies</h2></div>
+        <div class="roster-section-heading"><h2 id="goalies-title">Goalies <span class="roster-count" data-count-for="goalies"></span></h2></div>
         <div class="player-grid" data-position="goalies"></div>
     </section>
 </div>
-<p class="roster-credit">Roster, biographies, and headshots provided by the <a href="https://www.nhl.com/penguins/roster" target="_blank" rel="noopener">NHL and Pittsburgh Penguins</a>.</p>
 <script>
 const seasonId = document.getElementById('roster-groups').dataset.seasonId;
-const rosterStatus = document.getElementById('roster-status');
 function playerName(p) {
   const first = p.firstName?.default || p.firstName || '';
   const last = p.lastName?.default || p.lastName || '';
   return `${first} ${last}`.trim();
+}
+function playerLastName(p) {
+  return safeName(p.lastName) || playerName(p).trim().split(/\s+/).pop() || '';
+}
+function safeName(value) {
+  return value && typeof value === 'object' ? (value.default || '') : (value || '');
 }
 function renderPlayer(p) {
   const name = playerName(p);
@@ -57,16 +58,16 @@ function renderPlayer(p) {
 fetch(`/api/roster/${seasonId}`)
   .then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || `Roster unavailable (HTTP ${response.status}).`); return data; })
   .then(roster => {
-    let count = 0;
     ['forwards', 'defensemen', 'goalies'].forEach(group => {
       const grid = document.querySelector(`[data-position="${group}"]`);
-      const players = (roster[group] || []).slice().sort((a, b) => playerName(a).localeCompare(playerName(b)));
+      const players = (roster[group] || []).slice().sort((a, b) =>
+        playerLastName(a).localeCompare(playerLastName(b)) || playerName(a).localeCompare(playerName(b))
+      );
+      document.querySelector(`[data-count-for="${group}"]`).textContent = players.length;
       players.forEach(p => grid.append(renderPlayer(p)));
-      count += players.length;
       if (!players.length) grid.closest('.roster-section').hidden = true;
     });
-    rosterStatus.textContent = `${count} Penguins roster players and players who have appeared in at least one game this season. Select a player to see their NHL profile and stats.`;
   })
-  .catch(error => { rosterStatus.textContent = `The roster could not be loaded. ${error.message}`; });
+  .catch(error => console.error('The roster could not be loaded.', error));
 </script>
 {% endblock %}

@@ -10,3 +10,31 @@
 .profile-stats{min-width:1550px}.profile-stats.compact-stats{min-width:1250px}.xg-details{margin-top:1rem;border-top:1px solid var(--line)}.xg-details>summary{list-style:none;cursor:pointer;padding:.85rem .2rem;color:var(--gold);font-size:.9rem;font-weight:800}.xg-details>summary::-webkit-details-marker{display:none}.xg-details>summary:after{content:'+';float:right;font-size:1.2rem;line-height:1;color:var(--gold)}.xg-details[open]>summary:after{content:'−'}.xg-details .table-scroll{margin-top:.25rem}
 
 .season-tabs{display:flex;gap:.45rem;padding:.25rem;border:1px solid var(--line);border-radius:6px;background:#0b121a}.season-tab{border:0;border-radius:4px;padding:.6rem .8rem;background:transparent;color:var(--muted);font:inherit;font-size:.78rem;font-weight:700;cursor:pointer}.season-tab.active{background:var(--gold);color:var(--ink)}
+
+.roster-count{display:inline-flex;align-items:center;justify-content:center;min-width:1.7rem;height:1.7rem;padding:0 .4rem;border:1px solid #f4c84b55;border-radius:999px;background:#f4c84b12;color:var(--gold);font:700 .9rem/1 'Barlow Condensed',Impact,sans-serif;letter-spacing:0;vertical-align:middle}
+
+
+.profile-copy{width:56%;max-width:56%}.profile-copy h1{max-width:100%;font-size:clamp(2.8rem,7vw,6.8rem);overflow-wrap:anywhere}.profile-headshot{max-width:45%}@media(max-width:600px){.profile-copy{width:100%;max-width:100%;padding-bottom:220px}.profile-copy h1{max-width:100%;font-size:clamp(2.7rem,12vw,4.2rem)}.profile-headshot{height:58%;max-width:70%}}
+
+
+.roster-section-heading h2{display:flex;align-items:center;gap:.55rem}.roster-count{transform:translateY(-.08em)}
+
+
+.roster-count{transform:none;align-self:center}
+
+
+body,button,input,select,textarea{font-family:'Inter',Arial,sans-serif}.brand span,.intro:before,.intro h2,.section-title h3,.page-heading h2,.roster-hero h1,.roster-section-heading h2,.profile-copy h1,.profile-number,.stats-panel h2,.career-group h3,.roster-count{font-family:'Inter',Arial,sans-serif}.profile-stats,.career-stats{font-variant-numeric:tabular-nums}
+
+
+@font-face{font-family:'Newake';src:url('/static/NewakeFont-Demo.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}body,button,input,select,textarea{font-family:'Newake',Arial,sans-serif}.brand span,.intro:before,.intro h2,.section-title h3,.page-heading h2,.roster-hero h1,.roster-section-heading h2,.profile-copy h1,.profile-number,.stats-panel h2,.career-group h3,.roster-count,.axis-label{font-family:'Newake',Arial,sans-serif}
+
+
+.brand img{filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff) drop-shadow(0 4px 10px #0008)}
+
+
+
+
+
+
+.player-headshot{object-fit:contain;object-position:center center}
+

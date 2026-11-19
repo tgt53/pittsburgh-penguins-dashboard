@@ -3,12 +3,28 @@
 {% block title %}About | Pittsburgh Penguins Dashboard{% endblock %}
 
 {% block content %}
-    <h2>About this dashboard</h2>
-    <p>This dashboard focuses on Pittsburgh Penguins regular-season data from 2008–09 through 2025–26.</p>
-    <h3>On/off expected goals</h3>
-    <p>Each table row represents one Penguin in one season. “On ice” is expected goals for and against while that player was on the ice. “Off ice” is the team's expected goals for and against while that player was on the bench.</p>
-    <p>The totals are MoneyPuck's xGoals values. Per-60 rates divide each total by the relevant ice or bench minutes and multiply by 60. The season chart includes players with at least 10 games and weights rates by minutes. It describes what happened during those situations; it does not establish that an individual player caused the difference.</p>
-    <p>The dataset was prepared from MoneyPuck's public regular-season skater CSVs for season years 2008 through 2025. It keeps Pittsburgh's “all situations” row for each player and selects the on-ice and off-ice xGoals and time columns. Using “all situations” avoids counting the same player multiple times. The prepared dataset has 556 player-season rows.</p>
-    <p>Source: <a href="https://moneypuck.com/data.htm">MoneyPuck data downloads</a>. MoneyPuck requests clear credit whenever its data is shown.</p>
-    <p><a href="{{ url_for('home') }}">Back to the Penguins data</a></p>
+<section class="intro">
+    <h2>About</h2>
+</section>
+
+<section class="panel about-panel" aria-labelledby="profiles-title">
+    <h3 id="profiles-title">Player profiles</h3>
+    <p>Season stats are grouped by team and can be switched between regular season and playoffs. They include standard NHL totals such as games, goals, assists, points, shots, and time on ice. Career totals follow the selected season type.</p>
+    <p>Skater profiles also include MoneyPuck on/off expected-goal data when a season row is available. Goalies do not have these skater measures.</p>
+    <p>The <strong>Download data</strong> button provides a Penguins regular-season player-season dataset covering 2008–09 through 2025–26.</p>
+</section>
+
+<section class="panel about-panel" aria-labelledby="xg-title">
+    <h3 id="xg-title">What on/off expected goals mean</h3>
+    <p><strong>xGF</strong> means expected goals for; <strong>xGA</strong> means expected goals against. These are shot-quality estimates for the team, not goals credited to an individual player.</p>
+    <p>On-ice numbers cover the team’s expected goals while the player is on the ice. Off-ice numbers cover the team’s expected goals while that player is on the bench. A positive xG differential means xGF is higher than xGA.</p>
+    <p>Per-60 rates divide the expected-goal totals by the player’s on-ice or off-ice minutes and scale the result to 60 minutes. They help compare seasons with different amounts of playing time, but do not show that a player caused the team’s results.</p>
+</section>
+
+<section class="panel about-panel" aria-labelledby="sources-title">
+    <h3 id="sources-title">Data sources</h3>
+    <p>Roster, bios, and headshots come from the <a href="https://www.nhl.com/penguins/roster" target="_blank" rel="noopener">NHL and Pittsburgh Penguins</a>. Standard player statistics come from the <a href="https://www.nhl.com/stats/" target="_blank" rel="noopener">NHL</a>. On/off expected-goal data comes from <a href="https://moneypuck.com/data.htm" target="_blank" rel="noopener">MoneyPuck</a>.</p>
+</section>
+
+<p class="credit"><a href="{{ url_for('home') }}">Back to the roster</a></p>
 {% endblock %}

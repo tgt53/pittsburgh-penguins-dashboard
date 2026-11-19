@@ -27,7 +27,6 @@
             <div class="section-title"><div><p class="eyebrow" id="career-label">Regular season career totals</p><h2 id="career-stats-title">NHL career</h2></div></div>
             <div id="career-stats" class="career-stats"></div>
         </section>
-        <p class="roster-credit">Player details and standard statistics from the <a href="https://www.nhl.com/stats/" target="_blank" rel="noopener">NHL</a>. On/off expected-goals data from <a href="https://moneypuck.com/data.htm" target="_blank" rel="noopener">MoneyPuck</a> (skater seasons from 2007–08 through 2026–27). MoneyPuck asks that its data be credited when displayed.</p>
     </div>
 </section>
 <script>
@@ -104,10 +103,10 @@ function addCareerTotals(title, totals) {
 }
 let playerData, xgBySeason = new Map(), xgRowsBySeason = new Map(), selectedGameType = 2;
 function xgForSeason(season, team) {
-  const exact=xgBySeason.get(`${season}|${team}`);
+  const exact=xgBySeason.get(`${season}|${selectedGameType}|${team}`);
   if(exact)return exact;
   // Some traded seasons have one combined MoneyPuck row under the player's final team.
-  const candidates=xgRowsBySeason.get(season)||[];
+  const candidates=(xgRowsBySeason.get(season)||[]).filter(row=>Number(row['Game Type']||2)===selectedGameType);
   return candidates.length===1?candidates[0]:null;
 }
 function fillGoalieRow(row) {
@@ -142,7 +141,7 @@ function renderSelectedStats() {
   seasons.forEach(row=>{
     if(isGoalie){body.append(fillGoalieRow(row));return;}
     const season=`${String(row.season).slice(0,4)}-${String(row.season).slice(4)}`;
-    const xgRow=selectedGameType===2?xgForSeason(season,teamAbbreviation(row)):null;
+    const xgRow=xgForSeason(season,teamAbbreviation(row));
     body.append(fillSeasonRow(row,xgRow));xgBody.append(fillXgRow(row,xgRow));
   });
   if(!seasons.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=headers.length;td.textContent=`No NHL ${selectedGameType===2?'regular-season':'playoff'} stats available.`;tr.append(td);body.append(tr);}
@@ -173,7 +172,7 @@ fetch(`/api/player/${playerId}`)
     addFact(player.position==='G'?'Catches':'Shoots',sideLabel(player.shootsCatches));
     addFact('Birthplace',[safe(player.birthCity),safe(player.birthStateProvince),player.birthCountry].filter(Boolean).join(', '));
     const xgResponse=await fetch(`/api/moneypuck/on-off/${playerId}`),xgRows=xgResponse.ok?await xgResponse.json():[];
-    xgBySeason=new Map(xgRows.map(row=>[`${row.Season}|${row.Team}`,row]));
+    xgBySeason=new Map(xgRows.map(row=>[`${row.Season}|${row['Game Type']||2}|${row.Team}`,row]));
     xgRowsBySeason=new Map();
     xgRows.forEach(row=>{if(!xgRowsBySeason.has(row.Season))xgRowsBySeason.set(row.Season,[]);xgRowsBySeason.get(row.Season).push(row);});
     renderSelectedStats();statusBox.hidden=true;profileContent.hidden=false;

@@ -5,25 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#080d13">
     <title>{% block title %}Pittsburgh Penguins{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header class="site-header">
         <a class="brand" href="{{ url_for('home') }}" aria-label="Pittsburgh Penguins home">
             <img src="{{ url_for('static', filename='images/penguins_logo.png') }}" alt="Pittsburgh Penguins logo">
-            <span><b>PITTSBURGH</b><small>PENGUINS DATA</small></span>
+            <span><b>PITTSBURGH PENGUINS</b></span>
         </a>
         <nav aria-label="Main navigation">
             <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Players</a>
-            <a class="nav-link {% if request.endpoint == 'historical_on_off' %}active{% endif %}" href="{{ url_for('historical_on_off') }}">On/Off data</a>
             <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">About</a>
             <a class="nav-cta" href="{{ url_for('download_historical_on_off') }}">Download data <span aria-hidden="true">↗</span></a>
         </nav>
     </header>
     <main>{% block content %}{% endblock %}</main>
-    <footer class="site-footer"><span>BLACK &amp; GOLD. BY THE NUMBERS.</span><span>Data: MoneyPuck regular season</span></footer>
+    <footer class="site-footer"><span>Roster &amp; bios: <a href="https://www.nhl.com/penguins/roster" target="_blank" rel="noopener">NHL / Pittsburgh Penguins</a> · Standard stats: <a href="https://www.nhl.com/stats/" target="_blank" rel="noopener">NHL Stats</a> · On/off xG: <a href="https://moneypuck.com/data.htm" target="_blank" rel="noopener">MoneyPuck</a></span></footer>
 </body>
 </html>

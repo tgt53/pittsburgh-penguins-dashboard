@@ -36,7 +36,7 @@ def refresh_current_moneypuck_season() -> None:
             on_xgf, on_xga = float(row.get("OnIce_F_xGoals") or 0), float(row.get("OnIce_A_xGoals") or 0)
             off_xgf, off_xga = float(row.get("OffIce_F_xGoals") or 0), float(row.get("OffIce_A_xGoals") or 0)
             rows.append({
-                "Player ID": row.get("playerId", ""), "Season": f"{season_start}-{season_start + 1}",
+                "Player ID": row.get("playerId", ""), "Season": f"{season_start}-{season_start + 1}", "Game Type": 2,
                 "Team": {"L.A": "LAK", "N.J": "NJD", "S.J": "SJS", "T.B": "TBL"}.get(row["team"].upper(), row["team"].upper()),
                 "Player": row.get("name", ""), "Position": row.get("position", ""),
                 "Games": int(float(row.get("games_played") or 0)),
@@ -58,8 +58,13 @@ def refresh_current_moneypuck_season() -> None:
     with _moneypuck_refresh_lock:
         with MONEYPUCK_ALL_XG_DATA.open(encoding="utf-8", newline="") as source:
             reader = csv.DictReader(source)
-            fields = reader.fieldnames
-            existing = [row for row in reader if row.get("Season") != f"{season_start}-{season_start + 1}"]
+            fields = reader.fieldnames or []
+            if "Game Type" not in fields:
+                fields.insert(2, "Game Type")
+            existing = [
+                row for row in reader
+                if not (row.get("Season") == f"{season_start}-{season_start + 1}" and row.get("Game Type", "2") == "2")
+            ]
         temporary = MONEYPUCK_ALL_XG_DATA.with_suffix(".tmp")
         with temporary.open("w", encoding="utf-8", newline="") as target:
             writer = csv.DictWriter(target, fieldnames=fields)
